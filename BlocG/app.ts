@@ -1,11 +1,20 @@
 import express = require('express');
-import { HomeController } from './Controllers';
+import ejs = require('ejs');
+import bodyParser = require('body-parser');
+import { HomeController, RegistrationController } from './Controllers';
 
 const app: express.Application = express();
 const port: number = 5068;
-app.engine('html', require('ejs').renderFile);
+const renderEjsFile: Function = ejs.renderFile;
+const urlEncodedParser = bodyParser.urlencoded({ extended: false });
+const jsonParser = bodyParser.json();
+
+app.engine('html', renderEjsFile);
 app.set('view engine', 'html');
-app.use('/Home', HomeController);
+app.use(urlEncodedParser);
+app.use(jsonParser);
+app.use('/', HomeController);
+app.use('/api/Register', RegistrationController);
 
 app.listen(port, () => {
     console.log('Server launched!');
