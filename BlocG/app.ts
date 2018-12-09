@@ -1,8 +1,8 @@
 import express = require('express');
 import ejs = require('ejs');
 import bodyParser = require('body-parser');
-import { HomeController, RegistrationController } from './Controllers';
-
+const db = require('./data/db.ts');
+import { HomeController, RegistrationController } from './controllers';
 const app: express.Application = express();
 const port: number = 5068;
 const renderEjsFile: Function = ejs.renderFile;
