@@ -1,7 +1,8 @@
 import express = require('express');
 import ejs = require('ejs');
 import bodyParser = require('body-parser');
-const db = require('./data/db');
+require('./data/db');
+require('./services/passport');
 import { HomeController, RegistrationController } from './controllers';
 const app: express.Application = express();
 const port: number = 5068;
