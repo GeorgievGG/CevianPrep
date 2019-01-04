@@ -1,8 +1,7 @@
 import { Router, Request, Response } from 'express';
-import { IUserModel } from '../models';
-import { Model } from 'mongoose';
 import passport from 'passport';
 import jwt from 'jsonwebtoken';
+import { IUserModel } from '../interfaces/IUserModel';
 
 const router: Router = Router();
 

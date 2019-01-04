@@ -1,8 +1,5 @@
-import { Document, Schema, Model, model } from "mongoose";
-import { IUser } from "../interfaces/IUser";
-
-export interface IUserModel extends IUser, Document {
-}
+import { Schema, Model, model } from "mongoose";
+import { IUserModel } from "../interfaces/IUserModel";
 
 var UserSchema: Schema = new Schema({
     name: String,

@@ -1,9 +1,11 @@
 import express = require('express');
 import ejs = require('ejs');
 import bodyParser = require('body-parser');
+import { HomeController } from './controllers/home.controller';
+import { RegistrationController } from './controllers/registration.controller';
+import { LoginController } from './controllers/login.controller';
 require('./data/db');
 require('./services/passport');
-import { HomeController, RegistrationController, LoginController } from './controllers';
 const app: express.Application = express();
 const port: number = 5068;
 const renderEjsFile: Function = ejs.renderFile;

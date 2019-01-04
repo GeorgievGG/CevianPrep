@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
+import { Model } from 'mongoose';
 import { IUser } from '../interfaces/IUser';
-import { IUserModel } from '../models';
-import { Model, model } from 'mongoose';
-var User : Model<IUserModel> = model('User'); 
+import { IUserModel } from '../interfaces/IUserModel';
+import { User } from '../models/user';
 
 const router: Router = Router();
 
