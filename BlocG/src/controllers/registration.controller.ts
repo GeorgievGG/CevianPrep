@@ -13,18 +13,63 @@ router.post('/', (req: Request, res: Response) => {
         password : req.body.password,
         email : req.body.email
     };
-    
-    new User(user).save(function(err: Error, user: IUser) {
-        var strOutput;
-        if (err) {
-          console.log(err);
-          strOutput = `User ${user.username} couldn't be registered!`;
-        } else {
-          console.log('User created: ' + user);
-          strOutput = `User ${user.username} successfully registered!`;
-        }
-        res.send(strOutput);
-      });
+
+    usernameCheck(user, res)
+    .then(() => emailCheck(user, res))
+    .then(() => saveUser(user, res))
+    .then((value: string) => sendResponse(value, res))
+    .catch((value: string) => sendResponse(value, res));
 });
 
 export const RegistrationController: Router = router;
+
+function usernameCheck(user: IUser, res: Response) {
+  return new Promise<string>(function(resolve, reject) {
+    User.find({ username: user.username }, function (err: Error, users: Model<IUserModel>[]) {
+      if (err) {
+        console.log(err);
+        reject('Internal server error');
+      }
+      else if (users.length != 0) {
+        reject(`User ${user.username} already exists!`);
+      }
+      resolve('');
+    });
+  })
+}
+
+function emailCheck(user: IUser, res: Response) {
+  return new Promise<string>(function(resolve, reject) {
+    User.find({ email: user.email }, function (err: Error, users: Model<IUserModel>[]) {
+      if (err) {
+        console.log(err);
+        reject('Internal server error');
+      }
+      else if (users.length != 0) {
+        reject(`User with email ${user.email} already exists!`);
+      }
+      resolve('');
+    });
+  })
+}
+
+function saveUser(user: IUser, res: Response) {
+  return new Promise<string>(function(resolve, reject) {
+    new User(user).save(function (err: Error, user: IUser) {
+      if (err) {
+        console.log(err);
+        reject(`User ${user.username} couldn't be registered!`);
+      }
+      else {
+        console.log('User created: ' + user);
+        resolve(`User ${user.username} successfully registered!`);
+      }
+    });
+  })
+}
+
+function sendResponse(value: string, res: Response) {
+  return new Promise<string>(function(resolve, reject) {
+      res.send(value);
+  })
+}
