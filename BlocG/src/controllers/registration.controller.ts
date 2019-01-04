@@ -1,17 +1,20 @@
 import { Router, Request, Response } from 'express';
+import { IUser } from '../interfaces/IUser';
 import { IUserModel } from '../models';
-var mongoose = require("mongoose");
-var User = mongoose.model('User'); 
+import { Model, model } from 'mongoose';
+var User : Model<IUserModel> = model('User'); 
 
 const router: Router = Router();
 
 router.post('/', (req: Request, res: Response) => {
-    var user = User.create({
+    let user: IUser = {
         name : req.body.name,
         username : req.body.username,
         password : req.body.password,
         email : req.body.email
-      }).save(function(err: Error, user: IUserModel) {
+    };
+    
+    new User(user).save(function(err: Error, user: IUser) {
         var strOutput;
         if (err) {
           console.log(err);

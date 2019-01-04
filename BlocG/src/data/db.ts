@@ -1,26 +1,26 @@
-var mongoose = require('mongoose'); 
+var {connect, connection} = require('mongoose'); 
 
-var dbURI = 'mongodb://<user>:<password>@<db>'; 
+var dbURI = 'mongodb://sa:125634ab@ds127704.mlab.com:27704/blocg'; 
 
-mongoose.connect(dbURI); 
+connect(dbURI); 
 
-mongoose.connection.on('connected', function () {  
+connection.on('connected', function () {  
   console.log('Mongoose default connection open to ' + dbURI);
 }); 
 
-mongoose.connection.on('error',function (err) {  
+connection.on('error',function (err: Error) {  
   console.log('Mongoose default connection error: ' + err);
 }); 
 
-mongoose.connection.on('disconnected', function () {  
+connection.on('disconnected', function () {  
   console.log('Mongoose default connection disconnected'); 
 });
 
 process.on('SIGINT', function() {  
-  mongoose.connection.close(function () { 
+  connection.close(function () { 
     console.log('Mongoose default connection disconnected through app termination'); 
     process.exit(0); 
   }); 
 }); 
 
-require('../models/user.ts');  
+require('../models/user');  
