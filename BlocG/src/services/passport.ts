@@ -1,13 +1,15 @@
 import passport from 'passport';
-import { Strategy } from 'passport-local';
+import passportLocal from 'passport-local';
 import { User } from '../models/user';
 
-passport.use(new Strategy({
-        usernameField: 'email',
+const LocalStrategy = passportLocal.Strategy;
+
+passport.use(new LocalStrategy({
+        usernameField: 'username',
         passwordField: 'password'
     }, 
-    function (email: string, password: string, cb) {
-        return User.findOne({email: email, password: password})
+    function (username: string, password: string, cb: any) {
+        return User.findOne({username: username, password: password})
             .then(user => {
                 if (!user) {
                     return cb(null, false, {message: 'Incorrect email or password.'});

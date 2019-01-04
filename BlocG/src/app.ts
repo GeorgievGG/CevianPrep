@@ -3,7 +3,7 @@ import ejs = require('ejs');
 import bodyParser = require('body-parser');
 require('./data/db');
 require('./services/passport');
-import { HomeController, RegistrationController } from './controllers';
+import { HomeController, RegistrationController, LoginController } from './controllers';
 const app: express.Application = express();
 const port: number = 5068;
 const renderEjsFile: Function = ejs.renderFile;
@@ -17,6 +17,7 @@ app.use(jsonParser);
 
 app.use('/', HomeController);
 app.use('/api/register', RegistrationController);
+app.use('/api/login', LoginController);
 
 app.listen(port, () => {
     console.log('Server launched!');
