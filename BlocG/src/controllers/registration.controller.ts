@@ -17,8 +17,8 @@ router.post('/', (req: Request, res: Response) => {
     usernameCheck(user, res)
     .then(() => emailCheck(user, res))
     .then(() => saveUser(user, res))
-    .then((value: string) => sendResponse(value, res))
-    .catch((value: string) => sendResponse(value, res));
+    .then((value: string) => sendOkResponse(value, res))
+    .catch((value: string) => sendErrorResponse(value, res));
 });
 
 export const RegistrationController: Router = router;
@@ -68,8 +68,14 @@ function saveUser(user: IUser, res: Response) {
   })
 }
 
-function sendResponse(value: string, res: Response) {
+function sendOkResponse(value: string, res: Response) {
   return new Promise<string>(function(resolve, reject) {
       res.send(value);
+  })
+}
+
+function sendErrorResponse(value: string, res: Response) {
+  return new Promise<string>(function(resolve, reject) {
+      res.status(500).send(value);
   })
 }
