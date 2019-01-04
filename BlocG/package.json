@@ -15,7 +15,9 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "build": "cd ./src && tsc",
+    "start": "npm run build && node ./dist/app"
   },
   "modules": false,
   "author": "",
