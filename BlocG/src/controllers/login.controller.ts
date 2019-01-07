@@ -11,6 +11,7 @@ const internalServerErrorMessage = 'Internal server error';
 router.post('/', (req: Request, res: Response) => {
     authenticateUser(req, res)
     .then((user: IUserModel) => loginUser(user, req, res))
+    .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
 });
 
 export const LoginController: Router = router;
@@ -37,4 +38,10 @@ function loginUser(user: IUserModel, req: Request, res: Response) {
             res.json({ user, token });
         });
     })
+}
+
+function sendResponse(contentResponse: ContentResponse, res: Response) {
+  return new Promise<void>(function() {
+      res.status(contentResponse.statusCode).send(contentResponse.message);
+  })
 }
