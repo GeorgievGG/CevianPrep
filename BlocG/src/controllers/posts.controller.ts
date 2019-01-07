@@ -14,8 +14,16 @@ const unauthorizedErrorMessage = 'Unauthorized!';
 
 router.get('/posts', (req: Request, res: Response) => {
   authenticateUser(req, res)
-    .then(() => getAllUsers())
-    .then((users: IUserModel[]) => getAllPosts(users))
+    .then(() => getUsers(''))
+    .then((users: IUserModel[]) => getPosts(users))
+    .then((posts: IPost[]) => sendJsonResponse(posts, res))
+    .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
+});
+
+router.get('/users/:username/posts', (req: Request, res: Response) => {
+  authenticateUser(req, res)
+    .then(() => getUsers(req.params.username))
+    .then((users: IUserModel[]) => getPosts(users))
     .then((posts: IPost[]) => sendJsonResponse(posts, res))
     .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
 });
@@ -42,9 +50,9 @@ function authenticateUser(req: Request, res: Response) {
   })
 }
 
-function getAllUsers() {
+function getUsers(username: string) {
   return new Promise<IUserModel[]>(function (resolve, reject) {
-    User.find({}, function (err: Error, users: IUserModel[]) {
+    User.find(chooseUserSearchCondition(username), function (err: Error, users: IUserModel[]) {
       if (err) {
         console.log(err);
         reject(new ContentResponse(500, internalServerErrorMessage));
@@ -53,11 +61,20 @@ function getAllUsers() {
       resolve(users);
     });
   })
+
+  function chooseUserSearchCondition(username: string): any {
+    const isFilteredByUsername = username != '';
+    if (isFilteredByUsername) {
+      return { username: username }
+    }
+
+    return {};
+  }
 }
 
-function getAllPosts(users: IUserModel[]) {
+function getPosts(users: IUserModel[]) {
   return new Promise<IPost[]>(function (resolve, reject) {
-    Post.find({}, function (err: Error, posts: IPostModel[]) {
+    Post.find(choosePostSearchCondition(users), function (err: Error, posts: IPostModel[]) {
       if (err) {
         console.log(err);
         reject(new ContentResponse(500, internalServerErrorMessage));
@@ -77,6 +94,15 @@ function getAllPosts(users: IUserModel[]) {
     return function (element: IUserModel) {
       return element._id == post.user;
     };
+  }
+
+  function choosePostSearchCondition(users: IUserModel[]): any {
+    const isFilteredByUsername = users.length == 1;
+    if (isFilteredByUsername) {
+      return { user: users[0]._id }
+    }
+
+    return {};
   }
 }
 
