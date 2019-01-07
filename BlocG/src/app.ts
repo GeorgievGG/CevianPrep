@@ -2,6 +2,7 @@ import express = require('express');
 import ejs = require('ejs');
 import bodyParser = require('body-parser');
 import { HomeController } from './controllers/home.controller';
+import { PostsController } from './controllers/posts.controller';
 import { RegistrationController } from './controllers/registration.controller';
 import { LoginController } from './controllers/login.controller';
 require('./data/db');
@@ -18,6 +19,7 @@ app.use(urlEncodedParser);
 app.use(jsonParser);
 
 app.use('/', HomeController);
+app.use('/api', PostsController);
 app.use('/api/register', RegistrationController);
 app.use('/api/login', LoginController);
 
