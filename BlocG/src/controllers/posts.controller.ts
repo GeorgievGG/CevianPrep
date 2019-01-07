@@ -140,11 +140,11 @@ function savePost(post: IPost) {
     new Post(post).save(function (err: Error, post: IPost) {
       if (err) {
         console.log(err);
-        reject(new ContentResponse(500, `Post ${post.content} couldn't be added!`));
+        reject(new ContentResponse(500, `Post \'${post.content}\' couldn't be added!`));
       }
       else {
         console.log('Post created: ' + post);
-        resolve(new ContentResponse(200, `Post ${post.content} successfully added!`));
+        resolve(new ContentResponse(200, `Post \'${post.content}\' successfully added!`));
       }
     });
   })

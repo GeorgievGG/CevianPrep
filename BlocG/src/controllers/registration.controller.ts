@@ -40,7 +40,7 @@ function usernameCheck(user: IUser) {
         reject(new ContentResponse(500, internalServerErrorMessage));
       }
       else if (users.length != 0) {
-        reject(new ContentResponse(409, `User ${user.username} already exists!`));
+        reject(new ContentResponse(409, `User \'${user.username}\' already exists!`));
       }
 
       resolve(user);
@@ -56,7 +56,7 @@ function emailCheck(user: IUser) {
         reject(new ContentResponse(500, internalServerErrorMessage));
       }
       else if (users.length != 0) {
-        reject(new ContentResponse(409, `User with email ${user.email} already exists!`));
+        reject(new ContentResponse(409, `User with email \'${user.email}\' already exists!`));
       }
 
       resolve(user);
@@ -69,11 +69,11 @@ function saveUser(user: IUser) {
     new User(user).save(function (err: Error, user: IUser) {
       if (err) {
         console.log(err);
-        reject(new ContentResponse(500, `User ${user.username} couldn't be registered!`));
+        reject(new ContentResponse(500, `User \'${user.username}\' couldn't be registered!`));
       }
       else {
         console.log('User created: ' + user);
-        resolve(new ContentResponse(200, `User ${user.username} successfully registered!`));
+        resolve(new ContentResponse(200, `User \'${user.username}\' successfully registered!`));
       }
     });
   })
