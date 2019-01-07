@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
+import { Request, Response, Router } from 'express';
 import { Model } from 'mongoose';
 import { IUser } from '../interfaces/IUser';
 import { IUserModel } from '../interfaces/IUserModel';
-import { User } from '../models/user';
 import { ContentResponse } from '../models/contentResponse';
+import { User } from '../models/user';
 
 const router: Router = Router();
 const internalServerErrorMessage = 'Internal server error';
@@ -79,8 +79,8 @@ function saveUser(user: IUser) {
   })
 }
 
-function sendResponse(value: ContentResponse, res: Response) {
+function sendResponse(contentResponse: ContentResponse, res: Response) {
   return new Promise<void>(function() {
-      res.status(500).send(value);
+      res.status(contentResponse.statusCode).send(contentResponse.message);
   })
 }
