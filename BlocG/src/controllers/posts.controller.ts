@@ -8,10 +8,14 @@ import { ContentResponse } from '../models/contentResponse';
 import { Post } from '../models/post';
 
 const router: Router = Router();
+const internalServerErrorMessage = 'Internal server error';
+const alreadyExistsErrorMessage = 'Internal server error';
+const unauthorizedErrorMessage = 'Post already exists!';
 
 router.post('/users/posts', (req: Request, res: Response) => {
   authenticateUser(req, res)
     .then((user: IUserModel) => createPost(user, req))
+    .then((post: IPost) => validatePost(post))
     .then((post: IPost) => savePost(post))
     .then((contentResponse: ContentResponse) => sendResponse(contentResponse, res))
     .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
@@ -23,7 +27,7 @@ function authenticateUser(req: Request, res: Response) {
   return new Promise<IUserModel>(function (resolve, reject) {
     passport.authenticate('jwt', { session: false }, (err: Error, user: IUserModel) => {
       if (err || !user) {
-        reject(new ContentResponse(401, 'Unauthorized'))
+        reject(new ContentResponse(401, unauthorizedErrorMessage))
       };
       resolve(user);
     })(req, res);
@@ -48,10 +52,10 @@ function validatePost(post: IPost) {
     Post.find({ created: post.created, user: post.user }, function (err: Error, posts: Model<IPostModel>[]) {
       if (err) {
         console.log(err);
-        reject(new ContentResponse(500, 'Internal server error'));
+        reject(new ContentResponse(500, internalServerErrorMessage));
       }
       else if (posts.length != 0) {
-        reject(new ContentResponse(409, 'Post already exists!'));
+        reject(new ContentResponse(409, alreadyExistsErrorMessage));
       }
 
       resolve(post);
@@ -75,7 +79,7 @@ function savePost(post: IPost) {
 }
 
 function sendResponse(value: ContentResponse, res: Response) {
-  return new Promise<ContentResponse>(function () {
+  return new Promise<void>(function () {
     res.status(value.statusCode).send(value.message);
   })
 }
