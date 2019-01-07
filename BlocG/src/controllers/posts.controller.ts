@@ -9,8 +9,8 @@ import { Post } from '../models/post';
 
 const router: Router = Router();
 const internalServerErrorMessage = 'Internal server error';
-const alreadyExistsErrorMessage = 'Internal server error';
-const unauthorizedErrorMessage = 'Post already exists!';
+const alreadyExistsErrorMessage = 'Post already exists';
+const unauthorizedErrorMessage = 'Unauthorized!';
 
 router.post('/users/posts', (req: Request, res: Response) => {
   authenticateUser(req, res)
