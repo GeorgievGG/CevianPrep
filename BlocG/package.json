@@ -11,6 +11,7 @@
     "@types/passport": "^1.0.0",
     "@types/passport-jwt": "^3.0.1",
     "@types/passport-local": "^1.0.33",
+    "@types/password-hash": "^1.2.20",
     "body-parser": "^1.18.3",
     "ejs": "^2.6.1",
     "express": "^4.16.4",
@@ -19,6 +20,7 @@
     "passport": "^0.4.0",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "password-hash": "^1.2.2",
     "typescript": "^3.2.2"
   },
   "scripts": {

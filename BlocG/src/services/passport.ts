@@ -1,5 +1,6 @@
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
+import { verify } from 'password-hash';
 import passportLocal from 'passport-local';
 import { IUserModel } from '../interfaces/IUserModel';
 import { User } from '../models/user';
@@ -13,9 +14,9 @@ passport.use(new LocalStrategy({
     passwordField: 'password'
 },
     function (username: string, password: string, cb: any) {
-        return User.findOne({ username: username, password: password })
+        return User.findOne({ username: username })
             .then(user => {
-                if (!user) {
+                if (!(user && verify(password, user.password.toString()))) {
                     return cb(null, false, { message: 'Incorrect email or password.' });
                 }
                 return cb(null, user, { message: 'Logged In Successfully' });

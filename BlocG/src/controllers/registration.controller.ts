@@ -1,5 +1,6 @@
 import { Request, Response, Router } from 'express';
 import { Model } from 'mongoose';
+import { generate } from 'password-hash';
 import { IUser } from '../interfaces/IUser';
 import { IUserModel } from '../interfaces/IUserModel';
 import { ContentResponse } from '../models/contentResponse';
@@ -24,7 +25,7 @@ function createUser(req: Request) {
     var user: IUser = {
       name : req.body.name,
       username : req.body.username,
-      password : req.body.password,
+      password : generate(req.body.password),
       email : req.body.email
     };
 
