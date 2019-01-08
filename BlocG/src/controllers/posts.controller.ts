@@ -1,21 +1,21 @@
 import { Request, Response, Router } from 'express';
-import passport from 'passport';
 import { IPost } from '../interfaces/IPost';
 import { IPostModel } from '../interfaces/IPostModel';
 import { IUserModel } from '../interfaces/IUserModel';
+import { AuthenticationPayload } from '../models/authenticationPayload';
 import { ContentResponse } from '../models/contentResponse';
 import { Post } from '../models/post';
 import { User } from '../models/user';
-import { AuthenticationPayload } from '../models/authenticationPayload';
+import { authenticateUser } from '../services/authenticationService';
 
 const router: Router = Router();
-const internalServerErrorMessage = 'Internal server error';
-const alreadyExistsErrorMessage = 'Post already exists';
-const unauthorizedErrorMessage = 'Unauthorized!';
-const requiredErrorMessage = 'is required!';
+const authenticationStrategy: string = 'jwt';
+const internalServerErrorMessage: string = 'Internal server error';
+const alreadyExistsErrorMessage: string = 'Post already exists';
+const requiredErrorMessage: string = 'is required!';
 
 router.get('/posts', (req: Request, res: Response) => {
-  authenticateUser(req, res)
+  authenticateUser(authenticationStrategy, req, res)
     .then(() => getUsers(''))
     .then((users: IUserModel[]) => getPosts(users))
     .then((posts: IPost[]) => sendJsonResponse(posts, res))
@@ -23,7 +23,7 @@ router.get('/posts', (req: Request, res: Response) => {
 });
 
 router.get('/users/:username/posts', (req: Request, res: Response) => {
-  authenticateUser(req, res)
+  authenticateUser(authenticationStrategy, req, res)
     .then(() => getUsers(req.params.username))
     .then((users: IUserModel[]) => getPosts(users))
     .then((posts: IPost[]) => sendJsonResponse(posts, res))
@@ -31,7 +31,7 @@ router.get('/users/:username/posts', (req: Request, res: Response) => {
 });
 
 router.post('/users/posts', (req: Request, res: Response) => {
-  authenticateUser(req, res)
+  authenticateUser(authenticationStrategy, req, res)
     .then((user: AuthenticationPayload) => validateCreated(user, req))
     .then((user: AuthenticationPayload) => validateContent(user, req))
     .then((user: AuthenticationPayload) => validateTitle(user, req))
@@ -43,17 +43,6 @@ router.post('/users/posts', (req: Request, res: Response) => {
 });
 
 export const PostsController: Router = router;
-
-function authenticateUser(req: Request, res: Response) {
-  return new Promise<AuthenticationPayload>(function (resolve, reject) {
-    passport.authenticate('jwt', { session: false }, (err: Error, user: AuthenticationPayload) => {
-      if (err || !user) {
-        reject(new ContentResponse(401, unauthorizedErrorMessage))
-      };
-      resolve(user);
-    })(req, res);
-  })
-}
 
 function validateCreated(user: AuthenticationPayload, req: Request) {
   return new Promise<AuthenticationPayload>(function (resolve, reject) {

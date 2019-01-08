@@ -1,13 +1,27 @@
+import { Request, Response } from 'express';
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
 import passportLocal from 'passport-local';
 import { verify } from 'password-hash';
 import { AuthenticationPayload } from '../models/authenticationPayload';
+import { ContentResponse } from '../models/contentResponse';
 import { User } from '../models/user';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
+const unauthorizedErrorMessage: string = 'Unauthorized!';
+
+export function authenticateUser(stategyCode: string, req: Request, res: Response) {
+    return new Promise<AuthenticationPayload>(function (resolve, reject) {
+        passport.authenticate(stategyCode, { session: false }, (err: Error, user: AuthenticationPayload) => {
+            if (err || !user) {
+                reject(new ContentResponse(401, unauthorizedErrorMessage))
+            };
+            resolve(user);
+        })(req, res);
+    })
+}
 
 passport.use(new LocalStrategy({
     usernameField: 'username',
