@@ -4,9 +4,9 @@ import { ContentResponse } from '../models/contentResponse';
 import { authenticateUser, generateToken } from '../services/authenticationService';
 
 const router: Router = Router();
-const requiredErrorMessage = 'data is required!';
+const internalServerErrorMessage: string = 'Internal server error';
+const requiredErrorMessage: string = 'data is required!';
 const authenticationStrategy: string = 'local';
-const internalServerErrorMessage = 'Internal server error';
 
 router.post('/', (req: Request, res: Response) => {
     validateUsername(req)
