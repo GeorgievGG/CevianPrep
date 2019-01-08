@@ -1,8 +1,7 @@
 import { Request, Response, Router } from 'express';
-import jwt from 'jsonwebtoken';
 import { AuthenticationPayload } from '../models/authenticationPayload';
 import { ContentResponse } from '../models/contentResponse';
-import { authenticateUser } from '../services/authenticationService';
+import { authenticateUser, generateToken } from '../services/authenticationService';
 
 const router: Router = Router();
 const requiredErrorMessage = 'data is required!';
@@ -43,8 +42,11 @@ function loginUser(user: AuthenticationPayload, req: Request, res: Response) {
             if (err) {
                 reject(new ContentResponse(500, internalServerErrorMessage));
             }
-            const token = jwt.sign(JSON.stringify(user), 'KzLKzLKzLKzL'); //extract as a promise
-            res.json({ user, token });
+
+            generateToken(JSON.stringify(user), 'KzLKzLKzLKzL')
+                .then((output: string) => {
+                    res.json({ user, output })
+                });
         });
     })
 }

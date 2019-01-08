@@ -6,11 +6,13 @@ import { verify } from 'password-hash';
 import { AuthenticationPayload } from '../models/authenticationPayload';
 import { ContentResponse } from '../models/contentResponse';
 import { User } from '../models/user';
+import jwt from 'jsonwebtoken';
 
 const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 const unauthorizedErrorMessage: string = 'Unauthorized!';
+const internalServerErrorMessage: string = 'Internal server error';
 
 export function authenticateUser(stategyCode: string, req: Request, res: Response) {
     return new Promise<AuthenticationPayload>(function (resolve, reject) {
@@ -20,6 +22,18 @@ export function authenticateUser(stategyCode: string, req: Request, res: Respons
             };
             resolve(user);
         })(req, res);
+    })
+}
+
+export function generateToken(json: string, salt: string) {
+    return new Promise<string>(function (resolve, reject) {
+        try {
+            const token: string = jwt.sign(json, salt);
+            resolve(token);
+        }
+        catch {
+            reject(new ContentResponse(500, internalServerErrorMessage));
+        }
     })
 }
 
