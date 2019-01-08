@@ -1,5 +1,4 @@
 import { Request, Response, Router } from 'express';
-import { Model } from 'mongoose';
 import { generate } from 'password-hash';
 import { IUser } from '../interfaces/IUser';
 import { IUserModel } from '../interfaces/IUserModel';
@@ -35,7 +34,7 @@ function createUser(req: Request) {
 
 function usernameCheck(user: IUser) {
   return new Promise<IUser>(function(resolve, reject) {
-    User.find({ username: user.username }, function (err: Error, users: Model<IUserModel>[]) {
+    User.find({ username: user.username }, function (err: Error, users: IUserModel[]) {
       if (err) {
         console.log(err);
         reject(new ContentResponse(500, internalServerErrorMessage));
@@ -51,7 +50,7 @@ function usernameCheck(user: IUser) {
 
 function emailCheck(user: IUser) {
   return new Promise<IUser>(function(resolve, reject) {
-    User.find({ email: user.email }, function (err: Error, users: Model<IUserModel>[]) {
+    User.find({ email: user.email }, function (err: Error, users: IUserModel[]) {
       if (err) {
         console.log(err);
         reject(new ContentResponse(500, internalServerErrorMessage));

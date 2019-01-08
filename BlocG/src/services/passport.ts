@@ -1,8 +1,8 @@
 import passport from 'passport';
 import passportJWT from 'passport-jwt';
-import { verify } from 'password-hash';
 import passportLocal from 'passport-local';
-import { IUserModel } from '../interfaces/IUserModel';
+import { verify } from 'password-hash';
+import { AuthenticationPayload } from '../models/authenticationPayload';
 import { User } from '../models/user';
 
 const LocalStrategy = passportLocal.Strategy;
@@ -29,7 +29,7 @@ passport.use(new JWTStrategy({
     jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
     secretOrKey: 'KzLKzLKzLKzL'
 },
-    function (jwtPayload: IUserModel, cb: any) {
+    function (jwtPayload: AuthenticationPayload, cb: any) {
         if (!jwtPayload) {
             return cb(new Error("No payload found."));
         }

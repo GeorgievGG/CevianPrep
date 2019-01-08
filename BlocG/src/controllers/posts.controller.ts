@@ -6,6 +6,7 @@ import { IUserModel } from '../interfaces/IUserModel';
 import { ContentResponse } from '../models/contentResponse';
 import { Post } from '../models/post';
 import { User } from '../models/user';
+import { AuthenticationPayload } from '../models/authenticationPayload';
 
 const router: Router = Router();
 const internalServerErrorMessage = 'Internal server error';
@@ -30,7 +31,7 @@ router.get('/users/:username/posts', (req: Request, res: Response) => {
 
 router.post('/users/posts', (req: Request, res: Response) => {
   authenticateUser(req, res)
-    .then((user: IUserModel) => createPost(user, req))
+    .then((user: AuthenticationPayload) => createPost(user, req))
     .then((post: IPost) => validatePost(post))
     .then((post: IPost) => savePost(post))
     .then((contentResponse: ContentResponse) => sendResponse(contentResponse, res))
@@ -40,8 +41,8 @@ router.post('/users/posts', (req: Request, res: Response) => {
 export const PostsController: Router = router;
 
 function authenticateUser(req: Request, res: Response) {
-  return new Promise<IUserModel>(function (resolve, reject) {
-    passport.authenticate('jwt', { session: false }, (err: Error, user: IUserModel) => {
+  return new Promise<AuthenticationPayload>(function (resolve, reject) {
+    passport.authenticate('jwt', { session: false }, (err: Error, user: AuthenticationPayload) => {
       if (err || !user) {
         reject(new ContentResponse(401, unauthorizedErrorMessage))
       };
@@ -106,13 +107,13 @@ function getPosts(users: IUserModel[]) {
   }
 }
 
-function createPost(user: IUserModel, req: Request) {
+function createPost(user: AuthenticationPayload, req: Request) {
   return new Promise<IPost>(function (resolve) {
     let post: IPost = {
       created: req.body.created,
       content: req.body.content,
       title: req.body.title,
-      user: user._id
+      user: user.userId
     };
 
     resolve(post);

@@ -3,6 +3,7 @@ import passport from 'passport';
 import jwt from 'jsonwebtoken';
 import { IUserModel } from '../interfaces/IUserModel';
 import { ContentResponse } from '../models/contentResponse';
+import { AuthenticationPayload } from '../models/authenticationPayload';
 
 const router: Router = Router();
 const unauthorizedErrorMessage = 'Unauthorized!';
@@ -33,9 +34,9 @@ function loginUser(user: IUserModel, req: Request, res: Response) {
             if (err) {
                 reject(new ContentResponse(500, internalServerErrorMessage));
             }
-
-            const token = jwt.sign(user.toJSON(), 'KzLKzLKzLKzL');
-            res.json({ user, token });
+            var payload: AuthenticationPayload = new AuthenticationPayload(user._id, user.username.toString());
+            const token = jwt.sign(JSON.stringify(payload), 'KzLKzLKzLKzL'); //extract as a promise
+            res.json({ payload, token });
         });
     })
 }
