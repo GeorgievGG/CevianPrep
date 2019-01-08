@@ -12,6 +12,7 @@ const router: Router = Router();
 const internalServerErrorMessage = 'Internal server error';
 const alreadyExistsErrorMessage = 'Post already exists';
 const unauthorizedErrorMessage = 'Unauthorized!';
+const requiredErrorMessage = 'is required!';
 
 router.get('/posts', (req: Request, res: Response) => {
   authenticateUser(req, res)
@@ -31,6 +32,9 @@ router.get('/users/:username/posts', (req: Request, res: Response) => {
 
 router.post('/users/posts', (req: Request, res: Response) => {
   authenticateUser(req, res)
+    .then((user: AuthenticationPayload) => validateCreated(user, req))
+    .then((user: AuthenticationPayload) => validateContent(user, req))
+    .then((user: AuthenticationPayload) => validateTitle(user, req))
     .then((user: AuthenticationPayload) => createPost(user, req))
     .then((post: IPost) => validatePost(post))
     .then((post: IPost) => savePost(post))
@@ -49,6 +53,33 @@ function authenticateUser(req: Request, res: Response) {
       resolve(user);
     })(req, res);
   })
+}
+
+function validateCreated(user: AuthenticationPayload, req: Request) {
+  return new Promise<AuthenticationPayload>(function (resolve, reject) {
+      if (!req.body.created) {
+          reject(new ContentResponse(400, `Created date ${requiredErrorMessage}`));
+      }
+      resolve(user);
+  });
+}
+
+function validateContent(user: AuthenticationPayload, req: Request) {
+  return new Promise<AuthenticationPayload>(function (resolve, reject) {
+      if (!req.body.content) {
+          reject(new ContentResponse(400, `Content ${requiredErrorMessage}`));
+      }
+      resolve(user);
+  });
+}
+
+function validateTitle(user: AuthenticationPayload, req: Request) {
+  return new Promise<AuthenticationPayload>(function (resolve, reject) {
+      if (!req.body.title) {
+          reject(new ContentResponse(400, `Title ${requiredErrorMessage}`));
+      }
+      resolve(user);
+  });
 }
 
 function getUsers(username: string) {

@@ -7,11 +7,15 @@ import { User } from '../models/user';
 
 const router: Router = Router();
 const internalServerErrorMessage = 'Internal server error';
+const requiredErrorMessage = 'data is required!';
 
 router.post('/', (req: Request, res: Response) => {
-  createUser(req)
-    .then((user: IUser) => usernameCheck(user))
-    .then((user: IUser) => emailCheck(user))
+  validateUsername(req)
+    .then(() => validatePassword(req))
+    .then(() => validateEmail(req))
+    .then(() => createUser(req))
+    .then((user: IUser) => existingUserCheck(user))
+    .then((user: IUser) => existingEmailCheck(user))
     .then((user: IUser) => saveUser(user))
     .then((contentResponse: ContentResponse) => sendResponse(contentResponse, res))
     .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
@@ -20,20 +24,47 @@ router.post('/', (req: Request, res: Response) => {
 export const RegistrationController: Router = router;
 
 function createUser(req: Request) {
-  return new Promise<IUser>(function(resolve) {
+  return new Promise<IUser>(function (resolve) {
     var user: IUser = {
-      name : req.body.name,
-      username : req.body.username,
-      password : generate(req.body.password),
-      email : req.body.email
+      name: req.body.name,
+      username: req.body.username,
+      password: generate(req.body.password),
+      email: req.body.email
     };
 
     resolve(user);
   })
 }
 
-function usernameCheck(user: IUser) {
-  return new Promise<IUser>(function(resolve, reject) {
+function validateUsername(req: Request) {
+  return new Promise<void>(function (resolve, reject) {
+    if (!req.body.username) {
+      reject(new ContentResponse(400, `Username ${requiredErrorMessage}`));
+    }
+    resolve();
+  });
+}
+
+function validatePassword(req: Request) {
+  return new Promise<void>(function (resolve, reject) {
+    if (!req.body.password) {
+      reject(new ContentResponse(400, `Password ${requiredErrorMessage}`));
+    }
+    resolve();
+  });
+}
+
+function validateEmail(req: Request) {
+  return new Promise<void>(function (resolve, reject) {
+    if (!req.body.email) {
+      reject(new ContentResponse(400, `Email ${requiredErrorMessage}`));
+    }
+    resolve();
+  });
+}
+
+function existingUserCheck(user: IUser) {
+  return new Promise<IUser>(function (resolve, reject) {
     User.find({ username: user.username }, function (err: Error, users: IUserModel[]) {
       if (err) {
         console.log(err);
@@ -48,8 +79,8 @@ function usernameCheck(user: IUser) {
   })
 }
 
-function emailCheck(user: IUser) {
-  return new Promise<IUser>(function(resolve, reject) {
+function existingEmailCheck(user: IUser) {
+  return new Promise<IUser>(function (resolve, reject) {
     User.find({ email: user.email }, function (err: Error, users: IUserModel[]) {
       if (err) {
         console.log(err);
@@ -65,7 +96,7 @@ function emailCheck(user: IUser) {
 }
 
 function saveUser(user: IUser) {
-  return new Promise<ContentResponse>(function(resolve, reject) {
+  return new Promise<ContentResponse>(function (resolve, reject) {
     new User(user).save(function (err: Error, user: IUser) {
       if (err) {
         console.log(err);
@@ -80,7 +111,7 @@ function saveUser(user: IUser) {
 }
 
 function sendResponse(contentResponse: ContentResponse, res: Response) {
-  return new Promise<void>(function() {
-      res.status(contentResponse.statusCode).send(contentResponse.message);
+  return new Promise<void>(function () {
+    res.status(contentResponse.statusCode).send(contentResponse.message);
   })
 }

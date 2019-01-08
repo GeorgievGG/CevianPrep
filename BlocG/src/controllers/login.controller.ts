@@ -6,16 +6,37 @@ import { ContentResponse } from '../models/contentResponse';
 import { AuthenticationPayload } from '../models/authenticationPayload';
 
 const router: Router = Router();
+const requiredErrorMessage = 'data is required!';
 const unauthorizedErrorMessage = 'Unauthorized!';
 const internalServerErrorMessage = 'Internal server error';
 
 router.post('/', (req: Request, res: Response) => {
-    authenticateUser(req, res)
-    .then((user: IUserModel) => loginUser(user, req, res))
-    .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
+    validateUsername(req)
+        .then(() => validatePassword(req))
+        .then(() => authenticateUser(req, res))
+        .then((user: IUserModel) => loginUser(user, req, res))
+        .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
 });
 
 export const LoginController: Router = router;
+
+function validateUsername(req: Request) {
+    return new Promise<void>(function (resolve, reject) {
+        if (!req.body.username) {
+            reject(new ContentResponse(400, `Username ${requiredErrorMessage}`));
+        }
+        resolve();
+    });
+}
+
+function validatePassword(req: Request) {
+    return new Promise<void>(function (resolve, reject) {
+        if (!req.body.password) {
+            reject(new ContentResponse(400, `Password ${requiredErrorMessage}`));
+        }
+        resolve();
+    });
+}
 
 function authenticateUser(req: Request, res: Response) {
     return new Promise<IUserModel>(function (resolve, reject) {
@@ -42,7 +63,7 @@ function loginUser(user: IUserModel, req: Request, res: Response) {
 }
 
 function sendResponse(contentResponse: ContentResponse, res: Response) {
-  return new Promise<void>(function() {
-      res.status(contentResponse.statusCode).send(contentResponse.message);
-  })
+    return new Promise<void>(function () {
+        res.status(contentResponse.statusCode).send(contentResponse.message);
+    })
 }
