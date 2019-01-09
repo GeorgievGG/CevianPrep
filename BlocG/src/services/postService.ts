@@ -5,7 +5,7 @@ import { AuthenticationPayload } from "../models/authenticationPayload";
 import { ContentResponse } from "../models/contentResponse";
 import { Post } from "../models/post";
 import { PostInput } from "../models/postInput";
-import { getUserByUsername } from "./userService";
+import { getUserByUsername } from "../data/userRepository";
 
 const internalServerErrorMessage: string = 'Internal server error';
 const alreadyExistsErrorMessage: string = 'Post already exists';
