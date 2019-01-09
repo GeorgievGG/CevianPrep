@@ -47,7 +47,7 @@ passport.use(new LocalStrategy({
                 if (!(user && verify(password, user.password.toString()))) {
                     return cb(null, false, { message: 'Incorrect email or password.' });
                 }
-                return cb(null, user, { message: 'Logged In Successfully' });
+                return cb(null, new AuthenticationPayload(user._id, user.username.toString()), { message: 'Logged In Successfully' });
             })
             .catch(err => cb(err));
     }

@@ -128,9 +128,12 @@ function validatePost(post: IPost) {
       else if (posts.length != 0) {
         reject(new ContentResponse(409, alreadyExistsErrorMessage));
       }
-
-      resolve(post);
     });
+    if (!post.user) {
+      reject(new ContentResponse(400, `Username ${requiredErrorMessage}`));
+    }
+
+    resolve(post);
   })
 }
 

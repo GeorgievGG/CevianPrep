@@ -14,7 +14,6 @@ export function getAllUsers() {
 
 export function getUserByUsername(username: string) {
     return new Promise<IUserModel[]>(function (resolve, reject) {
-        console.log(username);
         User.find(chooseUserSearchCondition(username), function (err: Error, users: IUserModel[]) {
             if (err) {
                 console.log(err);
@@ -41,7 +40,6 @@ export function registerUser(input: RegistrationInput) {
 }
 
 function chooseUserSearchCondition(username: string): any {
-    console.log(username);
     const isFilteredByUsername = username != 'all';
     if (isFilteredByUsername) {
         return { username: username };
