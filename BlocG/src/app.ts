@@ -8,7 +8,7 @@ import { LoginController } from './controllers/login.controller';
 require('./data/db');
 require('./services/passport');
 const app: express.Application = express();
-const port: number = 5068;
+const port: number = 3000;
 const renderEjsFile: Function = ejs.renderFile;
 const urlEncodedParser = bodyParser.urlencoded({ extended: false });
 const jsonParser = bodyParser.json();
