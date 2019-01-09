@@ -1,37 +1,37 @@
 import { Request, Response, Router } from 'express';
-import passport from 'passport';
 import { IPost } from '../interfaces/IPost';
 import { IPostModel } from '../interfaces/IPostModel';
 import { IUserModel } from '../interfaces/IUserModel';
+import { AuthenticationPayload } from '../models/authenticationPayload';
 import { ContentResponse } from '../models/contentResponse';
 import { Post } from '../models/post';
-import { User } from '../models/user';
-import { AuthenticationPayload } from '../models/authenticationPayload';
+import { authenticateUser } from '../services/authenticationService';
+import { getAllUsers, getUserByUsername } from '../services/userService';
 
 const router: Router = Router();
-const internalServerErrorMessage = 'Internal server error';
-const alreadyExistsErrorMessage = 'Post already exists';
-const unauthorizedErrorMessage = 'Unauthorized!';
-const requiredErrorMessage = 'is required!';
+const authenticationStrategy: string = 'jwt';
+const internalServerErrorMessage: string = 'Internal server error';
+const alreadyExistsErrorMessage: string = 'Post already exists';
+const requiredErrorMessage: string = 'is required!';
 
 router.get('/posts', (req: Request, res: Response) => {
-  authenticateUser(req, res)
-    .then(() => getUsers(''))
+  authenticateUser(authenticationStrategy, req, res)
+    .then(() => getAllUsers())
     .then((users: IUserModel[]) => getPosts(users))
     .then((posts: IPost[]) => sendJsonResponse(posts, res))
     .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
 });
 
 router.get('/users/:username/posts', (req: Request, res: Response) => {
-  authenticateUser(req, res)
-    .then(() => getUsers(req.params.username))
+  authenticateUser(authenticationStrategy, req, res)
+    .then(() => getUserByUsername(req.params.username))
     .then((users: IUserModel[]) => getPosts(users))
     .then((posts: IPost[]) => sendJsonResponse(posts, res))
     .catch((contentResponse: ContentResponse) => sendResponse(contentResponse, res));
 });
 
 router.post('/users/posts', (req: Request, res: Response) => {
-  authenticateUser(req, res)
+  authenticateUser(authenticationStrategy, req, res)
     .then((user: AuthenticationPayload) => validateCreated(user, req))
     .then((user: AuthenticationPayload) => validateContent(user, req))
     .then((user: AuthenticationPayload) => validateTitle(user, req))
@@ -44,64 +44,31 @@ router.post('/users/posts', (req: Request, res: Response) => {
 
 export const PostsController: Router = router;
 
-function authenticateUser(req: Request, res: Response) {
-  return new Promise<AuthenticationPayload>(function (resolve, reject) {
-    passport.authenticate('jwt', { session: false }, (err: Error, user: AuthenticationPayload) => {
-      if (err || !user) {
-        reject(new ContentResponse(401, unauthorizedErrorMessage))
-      };
-      resolve(user);
-    })(req, res);
-  })
-}
-
 function validateCreated(user: AuthenticationPayload, req: Request) {
   return new Promise<AuthenticationPayload>(function (resolve, reject) {
-      if (!req.body.created) {
-          reject(new ContentResponse(400, `Created date ${requiredErrorMessage}`));
-      }
-      resolve(user);
+    if (!req.body.created) {
+      reject(new ContentResponse(400, `Created date ${requiredErrorMessage}`));
+    }
+    resolve(user);
   });
 }
 
 function validateContent(user: AuthenticationPayload, req: Request) {
   return new Promise<AuthenticationPayload>(function (resolve, reject) {
-      if (!req.body.content) {
-          reject(new ContentResponse(400, `Content ${requiredErrorMessage}`));
-      }
-      resolve(user);
+    if (!req.body.content) {
+      reject(new ContentResponse(400, `Content ${requiredErrorMessage}`));
+    }
+    resolve(user);
   });
 }
 
 function validateTitle(user: AuthenticationPayload, req: Request) {
   return new Promise<AuthenticationPayload>(function (resolve, reject) {
-      if (!req.body.title) {
-          reject(new ContentResponse(400, `Title ${requiredErrorMessage}`));
-      }
-      resolve(user);
-  });
-}
-
-function getUsers(username: string) {
-  return new Promise<IUserModel[]>(function (resolve, reject) {
-    User.find(chooseUserSearchCondition(username), function (err: Error, users: IUserModel[]) {
-      if (err) {
-        console.log(err);
-        reject(new ContentResponse(500, internalServerErrorMessage));
-      }
-
-      resolve(users);
-    });
-  })
-
-  function chooseUserSearchCondition(username: string): any {
-    const isFilteredByUsername = username != '';
-    if (isFilteredByUsername) {
-      return { username: username }
+    if (!req.body.title) {
+      reject(new ContentResponse(400, `Title ${requiredErrorMessage}`));
     }
-
-    return {};
-  }
+    resolve(user);
+  });
 }
 
 function getPosts(users: IUserModel[]) {
@@ -161,9 +128,12 @@ function validatePost(post: IPost) {
       else if (posts.length != 0) {
         reject(new ContentResponse(409, alreadyExistsErrorMessage));
       }
-
-      resolve(post);
     });
+    if (!post.user) {
+      reject(new ContentResponse(400, `Username ${requiredErrorMessage}`));
+    }
+
+    resolve(post);
   })
 }
 

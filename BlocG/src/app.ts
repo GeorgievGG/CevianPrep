@@ -6,7 +6,6 @@ import { PostsController } from './controllers/posts.controller';
 import { RegistrationController } from './controllers/registration.controller';
 import { LoginController } from './controllers/login.controller';
 require('./data/db');
-require('./services/passport');
 const app: express.Application = express();
 const port: number = 3000;
 const renderEjsFile: Function = ejs.renderFile;
