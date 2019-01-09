@@ -3,8 +3,7 @@ import { getUserByEmail, getUserByUsername, saveUser } from "../data/userReposit
 import { IUser } from "../interfaces/IUser";
 import { ContentResponse } from "../models/contentResponse";
 import { RegistrationInput } from "../models/registrationInput";
-
-const requiredErrorMessage = 'data is required!';
+import { validateRegistrationInput } from "./inputValidationService";
 
 export function getAllUsers() {
     return getUserByUsername('all');
@@ -12,9 +11,7 @@ export function getAllUsers() {
 
 export function registerUser(input: RegistrationInput) {
     return new Promise<ContentResponse>(function (resolve, reject) {
-        validateUsername(input)
-            .then(() => validatePassword(input))
-            .then(() => validateEmail(input))
+        validateRegistrationInput(input)
             .then(() => createUser(input))
             .then((user: IUser) => existingUserCheck(user))
             .then((user: IUser) => existingEmailCheck(user))
@@ -22,33 +19,6 @@ export function registerUser(input: RegistrationInput) {
             .then((response: ContentResponse) => resolve(response))
             .catch((response: ContentResponse) => reject(response));
     })
-}
-
-function validateUsername(input: RegistrationInput) {
-    return new Promise<void>(function (resolve, reject) {
-        if (!input.username) {
-            reject(new ContentResponse(400, `Username ${requiredErrorMessage}`));
-        }
-        resolve();
-    });
-}
-
-function validatePassword(input: RegistrationInput) {
-    return new Promise<void>(function (resolve, reject) {
-        if (!input.password) {
-            reject(new ContentResponse(400, `Password ${requiredErrorMessage}`));
-        }
-        resolve();
-    });
-}
-
-function validateEmail(input: RegistrationInput) {
-    return new Promise<void>(function (resolve, reject) {
-        if (!input.email) {
-            reject(new ContentResponse(400, `Email ${requiredErrorMessage}`));
-        }
-        resolve();
-    });
 }
 
 function createUser(input: RegistrationInput) {

@@ -5,16 +5,15 @@ import { IUserModel } from "../interfaces/IUserModel";
 import { AuthenticationPayload } from "../models/authenticationPayload";
 import { ContentResponse } from "../models/contentResponse";
 import { PostInput } from "../models/postInput";
+import { validatePostInput } from "./inputValidationService";
 
 const alreadyExistsErrorMessage: string = 'Post already exists';
 const requiredErrorMessage: string = 'is required!';
 
 export function addPost(user: AuthenticationPayload, input: PostInput) {
     return new Promise<ContentResponse>(function (resolve, reject) {
-        validateCreated(user, input)
-            .then((user: AuthenticationPayload) => validateContent(user, input))
-            .then((user: AuthenticationPayload) => validateTitle(user, input))
-            .then((user: AuthenticationPayload) => createPost(user, input))
+        validatePostInput(input)
+            .then(() => createPost(user, input))
             .then((post: IPost) => validatePost(post))
             .then((post: IPost) => savePost(post))
             .then((response: ContentResponse) => resolve(response))
@@ -33,33 +32,6 @@ export function getPostsByUsername(username: string) {
             .then((posts: IPost[]) => resolve(posts))
             .catch((response: ContentResponse) => reject(response));
     })
-}
-
-function validateCreated(user: AuthenticationPayload, input: PostInput) {
-    return new Promise<AuthenticationPayload>(function (resolve, reject) {
-        if (!input.created) {
-            reject(new ContentResponse(400, `Created date ${requiredErrorMessage}`));
-        }
-        resolve(user);
-    });
-}
-
-function validateContent(user: AuthenticationPayload, input: PostInput) {
-    return new Promise<AuthenticationPayload>(function (resolve, reject) {
-        if (!input.content) {
-            reject(new ContentResponse(400, `Content ${requiredErrorMessage}`));
-        }
-        resolve(user);
-    });
-}
-
-function validateTitle(user: AuthenticationPayload, input: PostInput) {
-    return new Promise<AuthenticationPayload>(function (resolve, reject) {
-        if (!input.title) {
-            reject(new ContentResponse(400, `Title ${requiredErrorMessage}`));
-        }
-        resolve(user);
-    });
 }
 
 function createPost(user: AuthenticationPayload, input: PostInput) {
