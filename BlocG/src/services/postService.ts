@@ -1,13 +1,11 @@
+import { getPosts, getPostsByAuthorAndDate, savePost } from "../data/postRepository";
+import { getUserByUsername } from "../data/userRepository";
 import { IPost } from "../interfaces/IPost";
-import { IPostModel } from "../interfaces/IPostModel";
 import { IUserModel } from "../interfaces/IUserModel";
 import { AuthenticationPayload } from "../models/authenticationPayload";
 import { ContentResponse } from "../models/contentResponse";
-import { Post } from "../models/post";
 import { PostInput } from "../models/postInput";
-import { getUserByUsername } from "../data/userRepository";
 
-const internalServerErrorMessage: string = 'Internal server error';
 const alreadyExistsErrorMessage: string = 'Post already exists';
 const requiredErrorMessage: string = 'is required!';
 
@@ -82,66 +80,13 @@ function validatePost(post: IPost) {
         if (!post.user) {
             reject(new ContentResponse(400, `Username ${requiredErrorMessage}`));
         }
+        getPostsByAuthorAndDate(post.user, post.created)
+            .then((posts: IPost[]) => {
+                if (posts.length != 0) {
+                    reject(new ContentResponse(409, alreadyExistsErrorMessage));
+                }
 
-        Post.find({ created: post.created, user: post.user }, function (err: Error, posts: IPostModel[]) {
-            if (err) {
-                console.log(err);
-                reject(new ContentResponse(500, internalServerErrorMessage));
-            }
-            else if (posts.length != 0) {
-                reject(new ContentResponse(409, alreadyExistsErrorMessage));
-            }
-    
-            resolve(post);
-        });
-    })
-}
-
-function savePost(post: IPost) {
-    return new Promise<ContentResponse>(function (resolve, reject) {
-        new Post(post).save(function (err: Error, post: IPost) {
-            if (err) {
-                console.log(err);
-                reject(new ContentResponse(500, `Post \'${post.content}\' couldn't be added!`));
-            }
-            else {
-                console.log('Post created: ' + post);
-                resolve(new ContentResponse(200, `Post \'${post.content}\' successfully added!`));
-            }
-        });
-    })
-}
-
-function getPosts(users: IUserModel[]) {
-    return new Promise<IPost[]>(function (resolve, reject) {
-        Post.find(choosePostSearchCondition(users), function (err: Error, posts: IPostModel[]) {
-            if (err) {
-                console.log(err);
-                reject(new ContentResponse(500, internalServerErrorMessage));
-            }
-            var simplePosts: IPost[] = posts.map(post => <IPost>{
-                created: post.created,
-                content: post.content,
-                title: post.title,
-                user: (<IUserModel>users.find(byId(post))).username
+                resolve(post);
             });
-
-            resolve(simplePosts);
-        });
     })
-
-    function choosePostSearchCondition(users: IUserModel[]): any {
-        const isFilteredByUsername = users.length == 1;
-        if (isFilteredByUsername) {
-            return { user: users[0]._id }
-        }
-
-        return {};
-    }
-
-    function byId(post: IPostModel): (value: IUserModel, index: number, obj: IUserModel[]) => boolean {
-        return function (element: IUserModel) {
-            return element._id == post.user;
-        };
-    }
 }
